@@ -62,8 +62,8 @@ const emptySnapshots: ApiSnapshot[] = [];
 
 const md1 = buildDiaryMarkdown(emptyEntry, emptySnapshots);
 assert(!md1.includes("## 阅读"), "No 阅读 heading when no WeRead snapshot");
-assert(!md1.includes("## 创造 / 编程"), "No 创造/编程 heading when no WakaTime snapshot");
-assert(md1.includes("## 发生了什么"), "Core fields still present");
+assert(!md1.includes("## 项目记录"), "No 项目记录 heading when no WakaTime snapshot");
+assert(md1.includes("## 记忆"), "Core fields still present");
 assert(md1.includes("Some happened text"), "Content preserved");
 
 // ── Test 3: Snapshot with empty markdown -> still no heading ──
@@ -80,7 +80,7 @@ const emptyMdSnapshot: ApiSnapshot = {
 };
 
 const md2 = buildDiaryMarkdown(emptyEntry, [emptyMdSnapshot]);
-assert(!md2.includes("## 创造 / 编程"), "No 创造/编程 heading when markdown is empty string");
+assert(!md2.includes("## 项目记录"), "No 项目记录 heading when markdown is empty string");
 
 // ── Test 4: Snapshot with markdown content exports heading ──
 console.log("\n4. Snapshot with markdown -> heading present");
@@ -96,7 +96,7 @@ const readySnapshot: ApiSnapshot = {
 };
 
 const md3 = buildDiaryMarkdown(emptyEntry, [readySnapshot]);
-assert(md3.includes("## 创造 / 编程"), "创造/编程 heading present when WakaTime exists");
+assert(md3.includes("## 项目记录"), "项目记录 heading present when WakaTime exists");
 assert(md3.includes("总编码时长"), "WakaTime markdown content present");
 
 const wereadSnapshot: ApiSnapshot = {
@@ -115,7 +115,7 @@ assert(md4.includes("三体"), "WeRead markdown content present");
 
 const md5 = buildDiaryMarkdown(emptyEntry, [readySnapshot, wereadSnapshot]);
 assert(md5.includes("## 阅读"), "Both modules present: 阅读");
-assert(md5.includes("## 创造 / 编程"), "Both modules present: 创造/编程");
+assert(md5.includes("## 项目记录"), "Both modules present: 项目记录");
 
 // ── Test 5: Snapshot status=empty -> no heading ──
 console.log("\n5. Snapshot status=empty -> no heading");
@@ -133,7 +133,7 @@ const errorSnapshot: ApiSnapshot = {
 const md6 = buildDiaryMarkdown(emptyEntry, [errorSnapshot]);
 // Note: getSnapshots filters by status='ready', so snapshots with error/empty status won't be passed to buildDiaryMarkdown
 // This test verifies the markdown builder handles whatever it receives
-assert(!md6.includes("## 创造 / 编程") || true, "Snapshot handling is correct"); // always passes as informational
+assert(!md6.includes("## 项目记录") || true, "Snapshot handling is correct"); // always passes as informational
 
 // ── Test 6: WakaTime markdown builder (empty state) ──
 console.log("\n6. WakaTime empty/error states -> no heading");
@@ -151,12 +151,12 @@ const wakaEmptySnapshot: ApiSnapshot = {
 
 const mdEmptyWaka = buildDiaryMarkdown(emptyEntry, [wakaEmptySnapshot]);
 // Empty markdown string means no heading in export
-assert(!mdEmptyWaka.includes("## 创造 / 编程"), "Empty WakaTime markdown -> no 创造/编程 heading");
+assert(!mdEmptyWaka.includes("## 项目记录"), "Empty WakaTime markdown -> no 项目记录 heading");
 
 const wakaWithContent = { ...wakaEmptyPayload, markdown: "- **总编码时长**: 30 mins" };
 const wakaContentSnapshot = { ...wakaEmptySnapshot, payload: wakaWithContent };
 const mdWakaContent = buildDiaryMarkdown(emptyEntry, [wakaContentSnapshot]);
-assert(mdWakaContent.includes("## 创造 / 编程"), "WakaTime with markdown content -> heading appears");
+assert(mdWakaContent.includes("## 项目记录"), "WakaTime with markdown content -> heading appears");
 
 // ── Test 7: WeRead JSON import data shape validation ──
 console.log("\n7. WeRead JSON import shape validation");

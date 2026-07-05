@@ -17,7 +17,7 @@ export function buildDiaryMarkdown(entry: DiaryEntry, snapshots: ApiSnapshot[]) 
   const wakatime = snapshots.find((snapshot) => snapshot.provider === "wakatime");
   const blocks = [`# ${entry.date}\n`];
 
-  blocks.push(section("发生了什么", entry.happened));
+  blocks.push(section("记忆", entry.happened));
   blocks.push(section("我在想什么", entry.thoughts));
   blocks.push(section("Ideas", entry.ideas));
 
@@ -31,7 +31,7 @@ export function buildDiaryMarkdown(entry: DiaryEntry, snapshots: ApiSnapshot[]) 
   if (wakatime) {
     const body = renderSnapshot(wakatime);
     if (body) {
-      blocks.push(section("创造 / 编程", body));
+      blocks.push(section("项目记录", body));
     }
   }
 

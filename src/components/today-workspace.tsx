@@ -447,16 +447,9 @@ export function TodayWorkspace() {
 
             <Field
               id="happened"
-              label="发生了什么"
+              label="记忆"
               value={entry.happened}
               onChange={(value) => patchEntry({ happened: value })}
-            />
-            <Field
-              id="thoughts"
-              label="我在想什么"
-              rows={7}
-              value={entry.thoughts}
-              onChange={(value) => patchEntry({ thoughts: value })}
             />
             <Field
               id="ideas"
@@ -512,6 +505,56 @@ export function TodayWorkspace() {
               value={entry.tomorrow}
               onChange={(value) => patchEntry({ tomorrow: value })}
             />
+
+            {/* Project records from WakaTime */}
+            {hasWakaTime && (
+              <div className="project-record-section">
+                <span className="project-record-label">项目记录</span>
+                <div className="project-record-grid">
+                  {(() => {
+                    const waka = apiSnapshots.find((s) => s.provider === "wakatime");
+                    if (!waka) return null;
+                    const p = waka.payload as Record<string, unknown>;
+                    const languages = Array.isArray(p.languages)
+                      ? (p.languages as Array<{ name: string; text: string; percent: number }>)
+                      : [];
+                    const projects = Array.isArray(p.projects)
+                      ? (p.projects as Array<{ name: string; text: string; percent: number }>)
+                      : [];
+                    return (
+                      <>
+                        <div className="project-record-group">
+                          <span className="project-record-heading">语言</span>
+                          {languages.length === 0 ? (
+                            <span className="project-record-empty">—</span>
+                          ) : (
+                            languages.map((lang) => (
+                              <span key={lang.name} className="project-record-item">
+                                <span>{lang.name}</span>
+                                <span>{lang.text}</span>
+                              </span>
+                            ))
+                          )}
+                        </div>
+                        <div className="project-record-group">
+                          <span className="project-record-heading">项目</span>
+                          {projects.length === 0 ? (
+                            <span className="project-record-empty">—</span>
+                          ) : (
+                            projects.map((proj) => (
+                              <span key={proj.name} className="project-record-item">
+                                <span>{proj.name}</span>
+                                <span>{proj.text}</span>
+                              </span>
+                            ))
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
           </article>
         )}
 
