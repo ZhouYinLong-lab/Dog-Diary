@@ -33,6 +33,15 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local diary data
+.dog-diary/
+
+# markdown exports
+/exports/
+
+# data backups
+/backups/
+
 # vercel
 .vercel
 

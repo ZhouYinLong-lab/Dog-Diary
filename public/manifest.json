@@ -1,0 +1,17 @@
+{
+  "name": "Dog-Diary",
+  "short_name": "Dog-Diary",
+  "description": "Local-first diary workbench",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f2",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
