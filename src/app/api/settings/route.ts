@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getIntegrationAccount, saveIntegrationAccount } from "@/lib/diary-db";
+import { isWakaTimeConfigured } from "@/lib/integrations/wakatime";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -7,6 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const wakatime = await getIntegrationAccount("wakatime");
   const weread = await getIntegrationAccount("weread");
+  const wakaConfig = await isWakaTimeConfigured();
 
   return NextResponse.json({
     wakatime: wakatime
@@ -15,6 +17,8 @@ export async function GET() {
     weread: weread
       ? { enabled: weread.enabled, apiKey: weread.apiKey ? "••••" : "", config: weread.config }
       : { enabled: false, apiKey: "", config: {} },
+    // Tell the frontend where the WakaTime key comes from
+    wakatimeKeySource: wakaConfig.source as "env" | "db" | "none",
   });
 }
 

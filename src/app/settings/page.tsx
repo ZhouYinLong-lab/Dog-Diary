@@ -22,6 +22,7 @@ type IntegrationConfig = {
 type SettingsData = {
   wakatime: IntegrationConfig;
   weread: IntegrationConfig;
+  wakatimeKeySource: "env" | "db" | "none";
 };
 
 export default function SettingsPage() {
@@ -32,6 +33,7 @@ export default function SettingsPage() {
   // Form state
   const [wakaEnabled, setWakaEnabled] = useState(false);
   const [wakaKey, setWakaKey] = useState("");
+  const [wakaKeySource, setWakaKeySource] = useState<"env" | "db" | "none">("none");
   const [wereadEnabled, setWereadEnabled] = useState(false);
 
   useEffect(() => {
@@ -41,6 +43,7 @@ export default function SettingsPage() {
         setSettings(data);
         setWakaEnabled(data.wakatime.enabled);
         setWakaKey(data.wakatime.apiKey);
+        setWakaKeySource(data.wakatimeKeySource);
         setWereadEnabled(data.weread.enabled);
         setStatus("ready");
       })
@@ -110,8 +113,18 @@ export default function SettingsPage() {
         <div className="settings-group">
           <h2><Code2 aria-hidden="true" /> WakaTime</h2>
           <p className="hint">连接 WakaTime 账号，自动获取每日编码数据。</p>
+          {wakaKeySource === "env" && (
+            <div className="env-banner">
+              <Check aria-hidden="true" />
+              <span>已通过环境变量 <code>WAKATIME_API_KEY</code>（.env）配置 — 下方设置将被忽略</span>
+            </div>
+          )}
           <div className="settings-field">
-            <label htmlFor="waka-key">API Key</label>
+            <label htmlFor="waka-key">
+              API Key
+              {wakaKeySource === "env" && <span className="key-source-tag">ENV</span>}
+              {wakaKeySource === "db" && <span className="key-source-tag db">DB</span>}
+            </label>
             <input
               id="waka-key"
               type="password"
@@ -120,7 +133,8 @@ export default function SettingsPage() {
                 setWakaKey(e.target.value);
                 if (e.target.value) setWakaEnabled(true);
               }}
-              placeholder="粘贴 WakaTime API Key…"
+              placeholder={wakaKeySource === "env" ? "已在 .env 中配置" : "粘贴 WakaTime API Key…"}
+              disabled={wakaKeySource === "env"}
             />
           </div>
           <label className="settings-checkbox" style={{ marginTop: 12 }}>

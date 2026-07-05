@@ -1833,6 +1833,54 @@ textarea:focus-visible {
   font-weight: 600;
 }
 
+/* ── Env var banner (settings) ── */
+.env-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #c6e0d6;
+  border-radius: var(--radius-sm);
+  background: #e8f5f0;
+  color: #0f5c52;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.env-banner svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.env-banner code {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 12px;
+  background: rgba(15, 118, 110, 0.12);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.key-source-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #c6e0d6;
+  color: #0f5c52;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+}
+
+.key-source-tag.db {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

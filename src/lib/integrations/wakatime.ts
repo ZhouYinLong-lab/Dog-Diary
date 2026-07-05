@@ -3,6 +3,10 @@
  *
  * Fetches daily summaries from the public WakaTime API and normalizes them
  * into the shared ApiSnapshot shape.
+ *
+ * API key resolution order:
+ *   1. Environment variable WAKATIME_API_KEY (`.env` file)
+ *   2. Database-stored key (Settings page)
  */
 
 import { getIntegrationAccount } from "@/lib/diary-db";
@@ -74,27 +78,75 @@ function buildWakaTimeMarkdown(payload: WakaTimeSnapshotPayload): string {
   return lines.join("\n");
 }
 
+/** Resolve API key: env var first, then DB. */
+async function resolveApiKey(): Promise<string | null> {
+  // Priority 1: environment variable
+  const envKey = process.env.WAKATIME_API_KEY;
+  if (envKey && envKey.trim()) {
+    return envKey.trim();
+  }
+
+  // Priority 2: database-stored key
+  const account = await getIntegrationAccount("wakatime");
+  if (account && account.apiKey && account.enabled) {
+    return account.apiKey;
+  }
+
+  return null;
+}
+
+/**
+ * Check whether WakaTime is configured (env var or DB).
+ */
+export async function isWakaTimeConfigured(): Promise<{
+  configured: boolean;
+  source: "env" | "db" | "none";
+}> {
+  const envKey = process.env.WAKATIME_API_KEY;
+  if (envKey && envKey.trim()) {
+    return { configured: true, source: "env" };
+  }
+
+  const account = await getIntegrationAccount("wakatime");
+  if (account && account.apiKey && account.enabled) {
+    return { configured: true, source: "db" };
+  }
+
+  return { configured: false, source: "none" };
+}
+
 /**
  * Fetch WakaTime summaries for a given date from the authenticated API.
  * Returns null if not configured or if the API returns no data.
+ *
+ * Uses `start` + `end` parameters for specific dates (not `range` which only
+ * accepts named values like "Today" / "Last 7 Days").
  */
 export async function fetchWakaTimeSummary(
   date: string,
 ): Promise<WakaTimeSnapshotPayload | null> {
-  const account = await getIntegrationAccount("wakatime");
-  if (!account || !account.apiKey || !account.enabled) {
+  const apiKey = await resolveApiKey();
+  if (!apiKey) {
+    console.warn("WakaTime: not configured (set WAKATIME_API_KEY in .env or via Settings)");
     return null;
   }
 
   try {
-    const url = `${WAKATIME_API}/users/current/summaries?range=${encodeURIComponent(date)}`;
+    // WakaTime uses Basic auth: base64("<api_key>")
+    const encoded = Buffer.from(apiKey).toString("base64");
+
+    // Use start + end for a specific date; range only supports named values
+    const url = `${WAKATIME_API}/users/current/summaries?start=${encodeURIComponent(date)}&end=${encodeURIComponent(date)}`;
     const response = await fetch(url, {
-      headers: { Authorization: `Basic ${Buffer.from(account.apiKey).toString("base64")}` },
+      headers: { Authorization: `Basic ${encoded}` },
       signal: AbortSignal.timeout(10_000),
     });
 
     if (!response.ok) {
-      console.warn(`WakaTime API returned ${response.status} for ${date}`);
+      const text = await response.text().catch(() => "");
+      console.warn(
+        `WakaTime API returned ${response.status} for ${date}${text ? `: ${text.slice(0, 200)}` : ""}`,
+      );
       return null;
     }
 
@@ -125,7 +177,8 @@ export async function fetchWakaTimeSummary(
 
     payload.markdown = buildWakaTimeMarkdown(payload);
     return payload;
-  } catch {
+  } catch (err) {
+    console.warn(`WakaTime fetch failed for ${date}:`, err);
     return null;
   }
 }
